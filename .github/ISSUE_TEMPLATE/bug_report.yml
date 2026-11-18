@@ -1,0 +1,29 @@
+name: Bug report
+description: A skill produced wrong, broken or unexpected output.
+labels: [bug]
+body:
+  - type: dropdown
+    id: skill
+    attributes:
+      label: Skill
+      options: [article-mastery, lecture-mastery, book-mastery, anki-lecture-cards, exam-lab, circuit-lab, trend-content, meeting-report, repository tooling]
+    validations:
+      required: true
+  - type: input
+    id: agent
+    attributes:
+      label: Agent or app used
+      placeholder: e.g. a CLI coding agent, a desktop chat app, an IDE agent
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened, and what did you expect?
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Smallest input that reproduces it
+      description: Remove any private data before pasting.

@@ -1,0 +1,21 @@
+name: Skill request or improvement
+description: Propose a new skill or a change to an existing one.
+labels: [enhancement]
+body:
+  - type: input
+    id: skill
+    attributes:
+      label: Skill (or "new")
+    validations:
+      required: true
+  - type: textarea
+    id: workflow
+    attributes:
+      label: The workflow it should run
+      description: Who uses it, what triggers it, the steps, and what the output must look like.
+    validations:
+      required: true
+  - type: textarea
+    id: verify
+    attributes:
+      label: How would we verify the output is good?
