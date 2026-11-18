@@ -1,207 +1,180 @@
 <div align="center">
 
-# AI-Skills
+# AI Skills
 
-**Engineered reasoning specifications for AI agents.**
+**Engineered reasoning workflows for AI agents.**
 
-A repository of AI Skills: each one a written specification defining a purpose, explicit trigger conditions, an ordered reasoning workflow, and fixed output rules — so an agent executes a defined process instead of improvising an answer.
+Eight production-tested skills for learning, exam prep, engineering projects, content and team operations: each one a written specification with explicit triggers, an ordered workflow, quality gates and fixed output rules, so an agent runs a defined process instead of improvising.
 
-![Skills Implemented](https://img.shields.io/badge/Skills_Implemented-1-blue?style=flat-square)
-![Status](https://img.shields.io/badge/Status-Active_Development-brightgreen?style=flat-square)
-![Spec Format](https://img.shields.io/badge/Spec_Format-SKILL.md-orange?style=flat-square)
-![Model Agnostic](https://img.shields.io/badge/Design-Model_Agnostic-9cf?style=flat-square)
-![Version](https://img.shields.io/badge/Version-v0.1.0-lightgrey?style=flat-square)
+[![CI](https://github.com/omar-issam-abdelhalim/ai-skills/actions/workflows/ci.yml/badge.svg)](https://github.com/omar-issam-abdelhalim/ai-skills/actions/workflows/ci.yml)
+![Skills](https://img.shields.io/badge/skills-8-blue?style=flat-square)
+![Format](https://img.shields.io/badge/format-Agent_Skills_(SKILL.md)-orange?style=flat-square)
+![Version](https://img.shields.io/badge/version-1.0.0-lightgrey?style=flat-square)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green?style=flat-square)](LICENSE)
 
 </div>
 
 ---
 
-## Table of Contents
+## Contents
 
-- [What This Repository Is](#what-this-repository-is)
-- [Repository Structure](#repository-structure)
-- [Skill Specification Format](#skill-specification-format)
-- [Skills Index](#skills-index)
-- [Using a Claude Skill](#using-a-claude-skill)
-- [Using a GPT](#using-a-gpt)
-- [Adding a New Skill](#adding-a-new-skill)
-- [Design Principles](#design-principles)
+- [Why skills, not prompts](#why-skills-not-prompts)
+- [The skills](#the-skills)
+- [Install](#install)
+- [Repository layout](#repository-layout)
+- [How a skill is built](#how-a-skill-is-built)
+- [Quality and testing](#quality-and-testing)
 - [Contributing](#contributing)
-- [A Note on This Documentation](#a-note-on-this-documentation)
 - [License](#license)
 
 ---
 
-## What This Repository Is
+## Why skills, not prompts
 
-A skill, as built here, is a formal specification. It defines a stated purpose, explicit trigger conditions, an ordered reasoning workflow, and fixed output rules, so a model executes a defined process rather than reconstructing behavior from memory each time it's asked to do something similar.
-
-The specification is what's designed and owned here — it is model-agnostic by intent. A given skill may then be *implemented* on more than one platform (for example, as a Claude Skill file, or as a GPT in ChatGPT). Those implementations are runtimes for the same underlying design, not separate skills to design independently — see [Skills Index](#skills-index) for what exists per skill, and where.
-
-**Current version:** `v0.1.0`
-
-This repository contains **one designed skill** ([`article-mastery`](#skills-index)). More will be added as they're actually built and validated — this README is updated to match what exists, not ahead of it.
-
-### Specification vs. Instruction
+A prompt maps an instruction straight to an output. A skill puts a defined process, and a review pass, between the request and the response.
 
 ```
 Prompt                          Skill
-  │                                │
-  ▼                                ▼
-Instruction                  Specification
-  │                                │
-  ▼                                ▼
-Output                         Workflow
-                                    │
-                                    ▼
-                               Self Review
-                                    │
-                                    ▼
-                                 Output
+  │                               │
+  ▼                               ▼
+Instruction                   Trigger conditions   ← when it activates (and when it must not)
+  │                               │
+  ▼                               ▼
+Output                        Ordered workflow     ← how it reasons, with human approval gates
+                                  │
+                                  ▼
+                              Quality gates        ← scripts and checklists that fail loudly
+                                  │
+                                  ▼
+                              Output rules         ← what the result must look like
 ```
 
-A prompt maps an instruction directly to an output. A skill inserts a defined process — and a review pass — between the request and the response.
+Every skill here follows the open [Agent Skills](https://agentskills.io) format: a folder with a `SKILL.md` (YAML frontmatter + instructions), plus optional `references/`, `scripts/`, `assets/` and `templates/` that the agent loads only when a step needs them. That keeps the always-loaded context small and the detailed knowledge one file away.
 
 ---
 
-## Repository Structure
+## The skills
 
-```
-AI-Skills/
-├── skills/
-│   └── article-mastery/
-│       └── SKILL.md
-└── README.md
-```
+### Learning
 
-Skills live under `skills/` from the start, even with a single skill implemented today — so the structure doesn't need to be reorganized as more are added. Anything not shown above does not currently exist in this repository.
+| Skill | What it does | Highlights |
+|---|---|---|
+| [**article-mastery**](skills/article-mastery/SKILL.md) | Turns one article into a full one-on-one mastery lesson, not a summary. | Models the article's hidden assumptions, researches gaps, self-reviews before answering. |
+| [**lecture-mastery**](skills/lecture-mastery/SKILL.md) | Teaches a lecture (PDF/PPTX/notes) to full mastery in parts, with checkpoints and a final mastery check. | Lecture-type playbooks (math, algorithms, code, conceptual), SymPy verification, goal/domain lenses, Arabic or English. |
+| [**book-mastery**](skills/book-mastery/SKILL.md) | Session-by-session, research-level mastery of 900–2000 page technical books. | Persistent ledger (Notion or Markdown), spaced review, hint ladder, provenance tags, L1–L5 mastery ladder. |
 
----
+### Exam prep
 
-## Skill Specification Format
+| Skill | What it does | Highlights |
+|---|---|---|
+| [**anki-lecture-cards**](skills/anki-lecture-cards/SKILL.md) | Turns study material into an importable Anki `.apkg`. | Deterministic deck and card IDs (re-imports never duplicate), exam-profile-aware card mix, card validator. |
+| [**exam-lab**](skills/exam-lab/SKILL.md) | Builds an offline exam-prep app from lectures, sheets and past exams. | Matches the course's real question style, quality gates (answer-length cue, T/F balance, duplicates), timed mock exam. |
 
-Every skill in this repository is written first as a single `SKILL.md` file — the master specification — with two parts:
+### Engineering
 
-**1. YAML frontmatter** — machine-readable metadata:
-```yaml
----
-name: skill-name
-description: >
-  What the skill does, and — critically — the trigger conditions:
-  the phrasings and contexts that should activate it, and just as
-  important, the ones that should NOT.
----
-```
+| Skill | What it does | Highlights |
+|---|---|---|
+| [**circuit-lab**](skills/circuit-lab/SKILL.md) | Takes an electronics course project from PDF to hand analysis, Proteus simulation, Tinkercad layout, physical build list and a viva learning pack. | Five gated phases, files-as-memory, KCL-based design checks, playbooks of real failure modes. |
 
-**2. Markdown body** — the specification itself, structured as:
-- **Inputs** — what's required from the user, and what should be inferred rather than asked
-- **Ordered workflow steps** — named stages of reasoning executed in sequence, not "think step by step" left to interpretation
-- **Output rules** — exact expectations for language, structure, and tone
-- A **self-review pass** before the output is finalized, checked against explicit criteria
+### Content and operations
 
-This `SKILL.md` is the source a platform-specific implementation is built from — see [Using a Claude Skill](#using-a-claude-skill) and [Using a GPT](#using-a-gpt) for how it's actually run.
-
-### Execution Flow
-
-```
-User Request
-      │
-      ▼
-Trigger Conditions
-      │
-      ▼
-Reasoning Workflow
-      │
-      ▼
-Output Contract
-      │
-      ▼
-Self Review
-      │
-      ▼
-Final Response
-```
-
-This defines executable reasoning behavior through a formal specification: trigger conditions bound *when* it activates, the workflow bounds *how* it reasons, and the output rules bound *what* the result looks like — all three written down, not implicit.
+| Skill | What it does | Highlights |
+|---|---|---|
+| [**trend-content**](skills/trend-content/SKILL.md) | Turns the week's AI news into a researched, fact-checked carousel with a publish kit. | Scoring rubric, fact table with "who says it", adversarial critic pass, HTML slide system + PNG renderer. |
+| [**meeting-report**](skills/meeting-report/SKILL.md) | Turns a transcript or notes into a decision-grade meeting report with running decision and action registers. | Decision vs proposal discipline, carry-over tracking, strict respectful-content rules, cross-meeting analysis. |
 
 ---
 
-## Skills Index
+## Install
 
-The only section of this README expected to keep growing. Each skill lists what it does, once, and every implementation currently available for it.
+Any agent that supports the Agent Skills format can use these skills.
 
-### 1. Article Mastery
+**With the `skills` CLI** (installs into the right folder for your agent):
 
-Converts a single article into a full one-on-one mastery lesson — not a summary — deep enough that the reader could explain, defend, and apply it without going back to the source.
+```bash
+# see what's in the repo
+npx skills add omar-issam-abdelhalim/ai-skills --list
 
-| Implementation | Access |
+# install one skill
+npx skills add omar-issam-abdelhalim/ai-skills --skill lecture-mastery
+
+# install everything, globally
+npx skills add omar-issam-abdelhalim/ai-skills --all -g
+```
+
+**Manually:** copy a folder from `skills/` into your agent's skills directory (the shared convention is `.agents/skills/<skill-name>/` in a project; check your agent's docs for its global path). For apps that take an upload, zip the skill folder and upload the `.zip`.
+
+Skills activate on their own when a request matches their description; you don't need to name them. Some also accept a command (`/learn lec`, `/exam-lab`, `/circuit-lab`, `/trend-content`).
+
+### Requirements per skill
+
+| Skill | Needs |
 |---|---|
-| Claude Skill (`SKILL.md`) | [View file](./skills/article-mastery/SKILL.md) |
-| GPT (ChatGPT) | 🔜 Soon |
-
-**Status:** Implemented
-
----
-
-## Using a Claude Skill
-
-1. In Claude, go to **Settings → Capabilities** and enable **Code execution and file creation** — Skills require it to run.
-2. Go to **Customize → Skills**.
-3. Click **"+"**, then either **"Upload a skill"** (a `.zip` of the skill folder) or **"Create skill"** to add it directly.
-4. Toggle it on. Claude invokes it automatically once your request matches its trigger conditions — you don't need to name it.
-
-Official sources:
-- Anthropic — [Introducing Agent Skills](https://claude.com/blog/skills)
-- Anthropic Engineering — [Equipping agents for the real world with Agent Skills](https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills)
-- Claude Help Center — [How to create custom skills](https://support.claude.com/en/articles/12512198-how-to-create-custom-skills)
-- Claude Help Center — [Use skills in Claude](https://support.claude.com/en/articles/12512180-use-skills-in-claude)
+| article-mastery | Web search + fetch |
+| lecture-mastery | Python 3, `sympy`, `pdfplumber`; `pdftoppm` or `pypdfium2` for page images; `python-pptx` (+ LibreOffice for slide images) for PPTX |
+| book-mastery | PDF tools; optional Notion integration (falls back to a Markdown ledger) |
+| anki-lecture-cards | Python 3, `genanki` |
+| exam-lab | Python 3, Node.js; Playwright for the smoke test |
+| circuit-lab | Windows + Proteus 8, a local desktop-control agent, a browser agent, Tinkercad account |
+| trend-content | Web search + fetch; Playwright for PNG export |
+| meeting-report | A transcript (any speech-to-text) or notes; optional Drive/wiki integration |
 
 ---
 
-## Using a GPT
+## Repository layout
 
-1. Open the GPT's link, listed per skill in the [Skills Index](#skills-index) once available.
-2. Sign in to ChatGPT if prompted.
-3. Send a message — the GPT already carries the skill's configured instructions, so it applies them automatically. No extra setup needed.
-4. You can find any GPT you've opened before under **Explore GPTs**, or bring it into an existing chat by typing `@` followed by its name.
-
-Official source:
-- OpenAI Help Center — [GPTs in ChatGPT](https://help.openai.com/en/articles/8554407-gpts-in-chatgpt)
+```
+ai-skills/
+├── skills/
+│   ├── article-mastery/      SKILL.md
+│   ├── lecture-mastery/      SKILL.md · references/ (playbooks, lens engine, mastery check) · scripts/
+│   ├── book-mastery/         SKILL.md · references/hub-and-ledger.md
+│   ├── anki-lecture-cards/   SKILL.md · references/card_rules.md · scripts/build_apkg.py
+│   ├── exam-lab/             SKILL.md · assets/ (app template, example data) · scripts/ (build, check)
+│   ├── circuit-lab/          SKILL.md · references/ (analysis, Proteus, Tinkercad) · templates/
+│   ├── trend-content/        SKILL.md · references/ · assets/slide-base.html · scripts/render_slides.py
+│   └── meeting-report/       SKILL.md · templates/config.md
+├── scripts/validate_skills.py   repository-wide skill validator
+├── tests/                       tests for every executable script
+├── docs/AUTHORING.md            how skills in this repo are designed and written
+└── .github/workflows/ci.yml     validation + tests on every push
+```
 
 ---
 
-## Adding a New Skill
+## How a skill is built
 
-1. Create `skills/<skill-name>/SKILL.md` following the [Skill Specification Format](#skill-specification-format) above — frontmatter, inputs, ordered workflow, output rules, self-review. This is the master definition every implementation is built from.
-2. Build whichever implementation(s) you actually have (a Claude Skill file, a GPT, or both). It's fine to ship one first and add the other later.
-3. Add a new block to the [Skills Index](#skills-index): a one-line description, and a small table listing each implementation and its access link (or "Soon" if still in progress).
-4. Nothing else in this README needs to change. If it does, that's a sign the new entry is inconsistent with the existing format — fix the entry, not the README.
+Every skill follows the same design rules (full guide: [docs/AUTHORING.md](docs/AUTHORING.md)):
+
+- **Specification over improvisation.** Purpose, triggers, workflow and output rules are written down, not left to how a request happens to be phrased.
+- **Bounded triggers.** The description says when the skill activates *and* when it must not (e.g. `article-mastery` never fires on "tl;dr").
+- **Human gates where mistakes are expensive.** Plans are approved before data is written; nothing is saved before the user has seen it.
+- **Verification, not plausibility.** Math is checked with SymPy, code is run, numbers carry their source, generated artifacts pass scripted checks.
+- **Honesty rules.** Inferences are labelled, unverified claims are marked, and no state is ever "remembered" without a verified source.
+- **Progressive disclosure.** `SKILL.md` stays lean; detail lives in `references/` and is read only at the step that needs it.
 
 ---
 
-## Design Principles
+## Quality and testing
 
-- **Specification over improvisation.** Behavior is defined in writing — purpose, triggers, workflow, output rules — not left to how a request happens to be phrased in the moment.
-- **One specification, many implementations.** The reasoning design lives in a single `SKILL.md`. A Claude Skill file or a GPT are different runtimes for that same design, not separate things to maintain independently.
-- **Depth over compression.** Where the default model behavior is to summarize, a skill can explicitly instruct it to do the opposite when that's the actual goal.
-- **Bounded trigger conditions.** A skill states clearly not just when it should activate, but when it deliberately should not — precision about scope is part of the design, not an afterthought.
-- **Self-review as part of the workflow, not an add-on.** The last step of the process is checking the output against explicit criteria before it's considered done.
-- **Single source of truth.** A skill's details live in its own file once. The README indexes; it does not duplicate.
+```bash
+pip install pyyaml pytest genanki sympy
+python scripts/validate_skills.py   # frontmatter, naming, broken file references, leaked private data
+pytest -q                           # tests for the Anki builder, math verifier, exam-lab kit
+```
+
+CI runs both on every push and pull request.
 
 ---
 
 ## Contributing
 
-This is currently a single-author project in early, active development. There's no formal contribution process in place yet — that will be added once there's more than one skill to establish a pattern from. If you want to suggest something, opening an issue is the right way to start a conversation.
+Issues and pull requests are welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md) and [docs/AUTHORING.md](docs/AUTHORING.md) first; every change must pass the validator and tests.
 
----
-
-## A Note on This Documentation
-
-This repository reflects the current implementation. Documentation evolves alongside the skills — features are documented only after they exist.
+See [CHANGELOG.md](CHANGELOG.md) for release history.
 
 ---
 
 ## License
 
-No license file has been added to this repository yet. Until one is added, standard copyright applies by default — all rights reserved. A license (e.g. MIT) will be added once the project reaches a state intended for open reuse.
+[MIT](LICENSE) © 2026 Omar Issam
